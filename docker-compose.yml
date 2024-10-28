@@ -1,15 +1,40 @@
 services:
-  gpt-researcher:
+  gpt-researcher-smart:
+    container_name: gpt-researcher-smart
     pull_policy: build
     image: gptresearcher/gpt-researcher
     build: ./
     environment: 
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       TAVILY_API_KEY: ${TAVILY_API_KEY}
-      LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY}
+      LLM_PROVIDER: "openai"
+      FAST_LLM_MODEL: "gpt-4o-mini"  
+      SMART_LLM_MODEL: "gpt-4o"
     restart: always
+    env_file: ".env"
     ports:
       - 8000:8000
+    networks:
+      - shared-network
+
+  gpt-researcher-cheap:
+    container_name: gpt-researcher-cheap
+    pull_policy: build
+    image: gptresearcher/gpt-researcher
+    build: ./
+    environment: 
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      TAVILY_API_KEY: ${TAVILY_API_KEY}
+      LLM_PROVIDER: "openai"
+      FAST_LLM_MODEL: "gpt-4o-mini"  
+      SMART_LLM_MODEL: "gpt-4o-mini"
+    restart: always
+    env_file: ".env"
+    ports:
+      - 9000:8000
+    networks:
+      - shared-network
+
   gptr-nextjs:
     pull_policy: build
     image: gptresearcher/gptr-nextjs
@@ -25,18 +50,6 @@ services:
     restart: always
     ports:
       - 3000:3000
-
-  gpt-researcher-tests:
-    image: gptresearcher/gpt-researcher-tests
-    build: ./
-    environment: 
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      TAVILY_API_KEY: ${TAVILY_API_KEY}
-      LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY}
-    profiles: ["test"]
-    command: >
-      /bin/sh -c "
-      pip install pytest pytest-asyncio faiss-cpu &&
-      python -m pytest tests/report-types.py &&
-      python -m pytest tests/vector-store.py
-      "
+      
+networks:
+  shared-network:
